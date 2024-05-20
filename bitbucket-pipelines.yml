@@ -1,0 +1,27 @@
+image: maven:3.6.3
+
+pipelines:
+  branches:
+    master:
+#      - step:
+#          name: Test
+#          script:
+#            - mvn verify
+
+      - step:
+          name: Build
+          script:
+            - mkdir app && git archive --format=tar.gz master -o ./app/$APP_NAME.tar.gz && ls ./app
+          artifacts:
+            - app/*.tar.gz
+
+      - step:
+          name: Deploy
+          script:
+            - pipe: atlassian/heroku-deploy:1.2.1
+              variables:
+                HEROKU_API_KEY: $API_KEY
+                HEROKU_APP_NAME: $APP_NAME
+                ZIP_FILE: 'app/$APP_NAME.tar.gz'
+                WAIT: 'true'
+                # DEBUG: '<boolean>' # Optional
